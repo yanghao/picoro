@@ -33,6 +33,11 @@ coro coroutine(int fun(coro)) {
 	return(coto(idle, fun));
 }
 
+void coroutine_start(void) {
+	char stack[16 * 1024];
+	coroutine_main(stack);
+}
+
 void coroutine_main(void *stack) {
 	int (*fun)(coro);
 	struct coro me;
@@ -41,11 +46,6 @@ void coroutine_main(void *stack) {
 	if(!setjmp(running->state))
 		coroutine_start();
 	exit(fun(&me));
-}
-
-void coroutine_start(void) {
-	char stack[16 * 1024];
-	coroutine_main(stack);
 }
 
 /* eof */
