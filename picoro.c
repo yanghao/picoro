@@ -12,12 +12,6 @@
 #include "picoro.h"
 
 /*
- * How much space to allow for coroutine stacks and the main stack.
- */
-#define COROSTACK (1<<12)
-#define MAINSTACK (1<<12)
-
-/*
  * Coroutines that are running or idle are on a list.
  * Each coroutine has a jmp_buf to hold its context when suspended.
  */
@@ -42,18 +36,17 @@ static char *tos;
 /*
  * The list of running coroutines. The coroutine at the head of the
  * list has the CPU, and all others are suspended inside resume().
- * The "first" coro object holds the context for the program's
- * initial stack and also ensures that all list elements have
- * non-NULL next pointers.
+ * The "first" coro object holds the context for the program's initial
+ * stack and also ensures that all externally-visible list elements
+ * have non-NULL next pointers. (The "first" coroutine isn't exposed
+ * to the caller.)
  */
 static struct coro first, *running = &first;
 
 /*
  * The list of idle coroutines that are suspended in coroutine_main().
- * The "last" coro object just marks end of list so that all
- * list elements have non-NULL next pointers.
  */
-static struct coro last, *idle = &last;
+static struct coro *idle;
 
 /*
  * A coroutine can be passed to resume() if
@@ -103,13 +96,44 @@ void *yield(void *arg) {
 	return(pass(pop(&running), arg));
 }
 
+/* Declare for mutual recursion. */
+void coroutine_start(void);
+
+/*
+ * The coroutine constructor function.
+ *
+ * On the first invocation there are no idle coroutines, so fork the
+ * first one, which will immediately yield back to us after becoming
+ * idle. When there are idle coroutines, we pass one the function
+ * pointer and return the activated coroutine's address.
+ */
+coro coroutine(void *fun(void *arg)) {
+	if(idle == NULL && !setjmp(running->state))
+		coroutine_start();
+	return(resume(pop(&idle), fun));
+}
+
 /*
  * The main loop for a coroutine is responsible for managing the "idle" list.
  *
- * We start off in the running state with a function to call. We immediately
- * yield a pointer to our context object so our creator can identify us. The
- * creator can then resume us at which point we pass the argument to the
- * function to start executing.
+ * When we start the idle list is empty, so we put ourself on it to
+ * ensure it remains non-NULL. Then we immediately suspend ourself
+ * waiting for the first function we are to run. (The head of the
+ * running list is the coroutine that forked us.) We pass the stack
+ * pointer to prevent it from being optimised away. The first time we
+ * are called we will return to the fork in the coroutine()
+ * constructor function (above); on subsequent calls we will resume
+ * the parent coroutine_main(). In both cases the passed value is
+ * ignored (yarg is not examined after the fork setjmp()s return true).
+ *
+ * When we are resumed, the idle list is empty again, so we fork
+ * another coroutine. When the child coroutine_main() passes control
+ * back to us, we drop into our main loop.
+ *
+ * We are now head of the running list with a function to call. We
+ * immediately yield a pointer to our context object so our creator
+ * can identify us. The creator can then resume us at which point we
+ * pass the argument to the function to start executing.
  *
  * When the function returns, we move ourself from the running list to
  * the idle list, before passing the result back to the resumer. (This
@@ -123,9 +147,12 @@ void *yield(void *arg) {
  * The conversion between the function pointer and a void pointer is not
  * allowed by ANSI C but we do it anyway.
  */
-void coroutine_main(void *fun(void *arg)) {
+void coroutine_main(void *stack) {
 	struct coro me;
-	push(&running, &me);
+	push(&idle, &me);
+	void *(*fun)(void *) = pass(&me, stack);
+	if(!setjmp(running->state))
+		coroutine_start();
 	for(;;) {
 		void *ret = fun(yield(&me));
 		push(&idle, pop(&running));
@@ -134,24 +161,12 @@ void coroutine_main(void *fun(void *arg)) {
 }
 
 /*
- * If an idle coroutine is available, activate it, otherwise create a new one.
- *
- * The way alloca() works is to subtract its argument from the stack pointer.
- * The first time we are called we move the stack pointer down by MAINSTACK.
- * Subsequent times we move it to approximately tos - COROSTACK. The address
- * of a local variable approximates the stack pointer.
+ * Allocate space for the current stack to grow before creating the
+ * initial stack frame for the next coroutine.
  */
-coro coroutine(void *fun(void *arg)) {
-	if(idle != &last)
-		return(resume(pop(&idle), fun));
-	/* Save our state to be yielded to from coroutine_main(). */
-	if(setjmp(running->state))
-		return(yarg);
-	/* Move stack pointer and save new top-of-stack */
-	tos = alloca(tos ? (char*)&fun - tos + COROSTACK : MAINSTACK);
-	/* Create coroutine's main call frame on new stack. */
-	coroutine_main(fun);
-	abort();
+void coroutine_start(void) {
+	char stack[1<<16];
+	coroutine_main(stack);
 }
 
 /* eof */
