@@ -13,18 +13,16 @@
 
 static struct coro {
 	jmp_buf state;
-} first, *running = &first, *idle;
+} first, *running = &first, *prev, *idle;
 
 coro corunning(void) {
 	return(running);
 }
 
-void *coto(coro dst, void *arg) {
-	static void *saved;
-	coro src = running;
-	running = dst;
-	saved = arg;
-	if(!setjmp(src->state)) longjmp(dst->state, 1);
+void *coto(coro next, void *arg) {
+	static void *saved; saved = arg;
+	prev = running; running = next;
+	if(!setjmp(prev->state)) longjmp(next->state, 1);
 	return(saved);
 }
 
@@ -45,6 +43,7 @@ void coroutine_starter(void *stack) {
 	struct coro me, *parent = running;
 	running = idle = &me;
 	fun = coto(parent, stack);
+	parent = prev;
 	if(!setjmp(running->state)) coroutine_new();
 	exit(fun(coto(parent, &me)));
 }
