@@ -59,10 +59,9 @@ bool resumable(coro c) {
 /*
  * Add a coroutine to a list and return the previous head of the list.
  */
-static inline coro push(coro *list, coro c) {
+static inline void push(coro *list, coro c) {
 	c->next = *list;
 	*list = c;
-	return(c->next);
 }
 
 /*
@@ -89,7 +88,8 @@ static void *pass(coro me, void *arg) {
 
 void *resume(coro c, void *arg) {
 	assert(resumable(c));
-	return(pass(push(&running, c), arg));
+	push(&running, c);
+	return(pass(c->next, arg));
 }
 
 void *yield(void *arg) {
