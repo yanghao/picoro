@@ -35,12 +35,12 @@ coro coroutine(int fun(coro)) {
 
 void coroutine_main(void *stack) {
 	int (*fun)(coro);
-	struct coro me, *parent = running;
+	struct coro me;
 	idle = &me;
-	fun = coto(parent, stack);
+	fun = coto(running, stack);
 	if(!setjmp(running->state))
 		coroutine_start();
-	exit(fun(parent));
+	exit(fun(&me));
 }
 
 void coroutine_start(void) {
