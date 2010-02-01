@@ -161,7 +161,7 @@ void coroutine_main(void *stack) {
  * initial stack frame for the next coroutine.
  */
 void coroutine_start(void) {
-	char stack[1<<16];
+	char stack[16 * 1024];
 	coroutine_main(stack);
 }
 
