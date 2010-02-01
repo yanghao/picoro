@@ -11,6 +11,8 @@ typedef struct coro *coro;
 
 coro coroutine(int fun(coro));
 
+coro corunning(void);
+
 void *coto(coro c, void *arg);
 
 #endif /* PICORO_H */

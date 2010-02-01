@@ -15,6 +15,10 @@ static struct coro {
 	jmp_buf state;
 } first, *running = &first, *idle;
 
+coro corunning(void) {
+	return(running);
+}
+
 void *coto(coro dst, void *arg) {
 	static void *saved;
 	coro src = running;
