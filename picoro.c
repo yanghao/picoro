@@ -21,19 +21,19 @@ struct coro {
 };
 
 /*
- * The list of running coroutines. The coroutine at the head of the
- * list has the CPU, and all others are suspended inside resume().
- * The "first" coro object holds the context for the program's initial
- * stack and also ensures that all externally-visible list elements
- * have non-NULL next pointers. (The "first" coroutine isn't exposed
- * to the caller.)
+ * The lists of running and idle coroutines.
+ *
+ * The coroutine at the head of the running list has the CPU, and all
+ * others are suspended inside resume(). The "first" coro object holds
+ * the context for the program's initial stack and also ensures that
+ * all externally-visible list elements have non-NULL next pointers.
+ * (The "first" coroutine isn't exposed to the caller.)
+ *
+ * The idle list contains coroutines that are suspended in
+ * coroutine_main(). After initialization it is never NULL except
+ * briefly while coroutine_main() forks a new idle coroutine.
  */
-static struct coro first, *running = &first;
-
-/*
- * The list of idle coroutines that are suspended in coroutine_main().
- */
-static struct coro *idle;
+static struct coro first, *running = &first, *idle;
 
 /*
  * A coroutine can be passed to resume() if
