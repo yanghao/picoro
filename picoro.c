@@ -29,26 +29,26 @@ void *coto(coro dst, void *arg) {
 	return(saved);
 }
 
-void coroutine_start(void), coroutine_main(void*);
+void coroutine_new(void), coroutine_starter(void*);
 
 coro coroutine(int fun(void *)) {
 	if(idle == NULL && !setjmp(running->state))
-		coroutine_start();
+		coroutine_new();
 	return(coto(idle, fun));
 }
 
-void coroutine_start(void) {
+void coroutine_new(void) {
 	char stack[16 * 1024];
-	coroutine_main(stack);
+	coroutine_starter(stack);
 }
 
-void coroutine_main(void *stack) {
+void coroutine_starter(void *stack) {
 	int (*fun)(coro);
 	struct coro me, *parent = running;
 	running = idle = &me;
 	fun = coto(parent, stack);
 	if(!setjmp(running->state))
-		coroutine_start();
+		coroutine_new();
 	exit(fun(coto(parent, &me)));
 }
 
