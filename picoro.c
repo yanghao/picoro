@@ -53,7 +53,7 @@ static struct coro *idle;
  * it is not on the running or idle lists.
  */
 bool resumable(coro c) {
-	return(c->next == NULL);
+	return(c != NULL && c->next == NULL);
 }
 
 /*
