@@ -9,12 +9,8 @@
 
 typedef struct coro *coro;
 
-coro coroutine(void *fun(void *arg));
+coro coroutine(int fun(coro));
 
-bool resumable(coro c);
-
-void *resume(coro c, void *arg);
-
-void *yield(void *arg);
+void *coto(coro c, void *arg);
 
 #endif /* PICORO_H */
