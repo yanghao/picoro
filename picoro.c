@@ -24,16 +24,14 @@ void *coto(coro dst, void *arg) {
 	coro src = running;
 	running = dst;
 	saved = arg;
-	if(!setjmp(src->state))
-		longjmp(dst->state, 1);
+	if(!setjmp(src->state)) longjmp(dst->state, 1);
 	return(saved);
 }
 
 void coroutine_new(void), coroutine_starter(void*);
 
 coro coroutine(int fun(void *)) {
-	if(idle == NULL && !setjmp(running->state))
-		coroutine_new();
+	if(!idle && !setjmp(running->state)) coroutine_new();
 	return(coto(idle, fun));
 }
 
@@ -47,8 +45,7 @@ void coroutine_starter(void *stack) {
 	struct coro me, *parent = running;
 	running = idle = &me;
 	fun = coto(parent, stack);
-	if(!setjmp(running->state))
-		coroutine_new();
+	if(!setjmp(running->state)) coroutine_new();
 	exit(fun(coto(parent, &me)));
 }
 
