@@ -135,14 +135,15 @@ coro coroutine(void *fun(void *arg)) {
  * The conversion between the function pointer and a void pointer is not
  * allowed by ANSI C but we do it anyway.
  */
-void coroutine_main(void *stack) {
+void coroutine_main(void *ret) {
+	void *(*fun)(void *arg);
 	struct coro me;
 	push(&idle, &me);
-	void *(*fun)(void *) = pass(&me, stack);
+	fun = pass(&me, ret);
 	if(!setjmp(running->state))
 		coroutine_start();
 	for(;;) {
-		void *ret = fun(yield(&me));
+		ret = fun(yield(&me));
 		push(&idle, pop(&running));
 		fun = pass(&me, ret);
 	}
