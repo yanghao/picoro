@@ -11,11 +11,9 @@
 
 #include "picoro.h"
 
-struct coro {
+static struct coro {
 	jmp_buf state;
-};
-
-static struct coro first, *running = &first, *idle;
+} first, *running = &first, *idle;
 
 void *coto(coro dst, void *arg) {
 	static void *saved;
@@ -27,7 +25,7 @@ void *coto(coro dst, void *arg) {
 	return(saved);
 }
 
-void coroutine_start(void);
+void coroutine_start(void), coroutine_main(void*);
 
 coro coroutine(int fun(coro)) {
 	if(idle == NULL && !setjmp(running->state))
