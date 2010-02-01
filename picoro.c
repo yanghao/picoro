@@ -12,16 +12,9 @@
 #include "picoro.h"
 
 /*
- * Coroutines that are running or idle are on a list.
  * Each coroutine has a jmp_buf to hold its context when suspended.
- */
-struct coro {
-	struct coro *next;
-	jmp_buf state;
-};
-
-/*
- * The lists of running and idle coroutines.
+ *
+ * There are lists of running and idle coroutines.
  *
  * The coroutine at the head of the running list has the CPU, and all
  * others are suspended inside resume(). The "first" coro object holds
@@ -33,7 +26,10 @@ struct coro {
  * coroutine_main(). After initialization it is never NULL except
  * briefly while coroutine_main() forks a new idle coroutine.
  */
-static struct coro first, *running = &first, *idle;
+static struct coro {
+	struct coro *next;
+	jmp_buf state;
+} first, *running = &first, *idle;
 
 /*
  * A coroutine can be passed to resume() if
