@@ -31,7 +31,7 @@ void *coto(coro dst, void *arg) {
 
 void coroutine_start(void), coroutine_main(void*);
 
-coro coroutine(int fun(coro)) {
+coro coroutine(int fun(void *)) {
 	if(idle == NULL && !setjmp(running->state))
 		coroutine_start();
 	return(coto(idle, fun));
@@ -44,12 +44,12 @@ void coroutine_start(void) {
 
 void coroutine_main(void *stack) {
 	int (*fun)(coro);
-	struct coro me;
-	idle = &me;
-	fun = coto(running, stack);
+	struct coro me, *parent = running;
+	running = idle = &me;
+	fun = coto(parent, stack);
 	if(!setjmp(running->state))
 		coroutine_start();
-	exit(fun(&me));
+	exit(fun(coto(parent, &me)));
 }
 
 /* eof */

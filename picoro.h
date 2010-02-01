@@ -9,7 +9,7 @@
 
 typedef struct coro *coro;
 
-coro coroutine(int fun(coro));
+coro coroutine(int fun(void *));
 
 coro corunning(void);
 
