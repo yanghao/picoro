@@ -21,11 +21,6 @@ struct coro {
 };
 
 /*
- * A place to hold the yield/resume argument while switching stacks.
- */
-static void *yarg;
-
-/*
  * The C stack is divided into chunks each of which is used as an
  * independent stack for a coroutine. We keep a top-of-stack pointer
  * (which is actually the base of the newest coroutine's stack) to use
@@ -79,11 +74,12 @@ static inline coro pop(coro *list) {
  * The current coroutine's state is saved in "me" and the
  * target coroutine is at the head of the "running" list.
  */
-static void *pass(coro me, void *arg) {
-	yarg = arg;
+static void *pass(coro me, void arg) {
+	static void *saved;
+	saved = arg;
 	if(!setjmp(me->state))
 		longjmp(running->state, 1);
-	return(yarg);
+	return(saved);
 }
 
 void *resume(coro c, void *arg) {
@@ -124,7 +120,7 @@ coro coroutine(void *fun(void *arg)) {
  * are called we will return to the fork in the coroutine()
  * constructor function (above); on subsequent calls we will resume
  * the parent coroutine_main(). In both cases the passed value is
- * ignored (yarg is not examined after the fork setjmp()s return true).
+ * lost when pass() longjmp()s to the forking setjmp().
  *
  * When we are resumed, the idle list is empty again, so we fork
  * another coroutine. When the child coroutine_main() passes control
