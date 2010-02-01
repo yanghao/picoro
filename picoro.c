@@ -21,14 +21,6 @@ struct coro {
 };
 
 /*
- * The C stack is divided into chunks each of which is used as an
- * independent stack for a coroutine. We keep a top-of-stack pointer
- * (which is actually the base of the newest coroutine's stack) to use
- * when calculating where to allocate the next stack chunk.
- */
-static char *tos;
-
-/*
  * The list of running coroutines. The coroutine at the head of the
  * list has the CPU, and all others are suspended inside resume().
  * The "first" coro object holds the context for the program's initial
