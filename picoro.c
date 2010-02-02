@@ -12,7 +12,7 @@
 
 static struct coro {
 	jmp_buf buf;
-} first, *here = &first, *prev, *idle;
+} first, *here = &first, *idle;
 
 coro corunning(void) {
 	return(here);
@@ -20,14 +20,14 @@ coro corunning(void) {
 
 va_list coto(coro next, ...) {
 	static va_list ap; va_start(ap, next);
-	prev = here; here = next;
+	coro prev = here; here = next;
 	if(!setjmp(prev->buf)) longjmp(next->buf, 1);
 	return(ap);
 }
 
 void coroutine1(void), coroutine2(void*);
 
-va_list coroutine(int (*fun)(coro,va_list), ...) {
+va_list coroutine(corofun *fun, ...) {
 	va_list ap; va_start(ap, fun);
 	if(!idle && !setjmp(here->buf)) coroutine1();
 	return(coto(idle, fun, ap));
@@ -39,14 +39,10 @@ void coroutine1(void) {
 }
 
 void coroutine2(void *dummy) {
-	struct coro me;
-	va_list ap1, ap2;
-	int (*fun)(coro,va_list);
-	prev = here; here = idle = &me;
-	ap1 = coto(prev, dummy);
-	fun = va_arg(ap1, int (*)(coro,va_list));
-	ap2 = va_arg(ap1, va_list);
-	      va_end(ap1);
+	struct coro me, *prev = here; here = idle = &me;
+	va_list ap1 = coto(prev, dummy);
+	corofun *fun = va_arg(ap1, corofun *);
+	va_list ap2 = va_arg(ap1, va_list);
 	if(!setjmp(here->buf)) coroutine1();
 	exit(fun(here, ap2));
 }

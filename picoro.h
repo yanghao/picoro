@@ -8,9 +8,10 @@
 #define PICORO_H
 
 typedef struct coro *coro;
+typedef int corofun(coro,va_list);
 
-coro corunning(void);
-va_list coroutine(int fun(coro,va_list), ...);
+va_list coroutine(corofun *fun, ...);
 va_list coto(coro, ...);
+coro corunning(void);
 
 #endif /* PICORO_H */

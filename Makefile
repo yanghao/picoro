@@ -1,4 +1,4 @@
-CFLAGS = -pipe -O -g -std=c89 -pedantic -Wall -Wextra \
+CFLAGS = -pipe -O -g -std=c99 -pedantic -Wall -Wextra \
 	-Wbad-function-cast -Wcast-align -Wcast-qual -Wconversion -Winline \
 	-Wmissing-declarations -Wmissing-prototypes -Wnested-externs \
 	-Wold-style-definition -Wpointer-arith -Wredundant-decls -Wshadow \
