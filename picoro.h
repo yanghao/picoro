@@ -9,8 +9,8 @@
 
 typedef struct coro *coro;
 
-coro corunning(void);
-coro coroutine(int fun(void*));
+coro cohere(void);
 void *coto(coro, void*);
+coro coroutine(int fun(void*));
 
 #endif /* PICORO_H */

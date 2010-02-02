@@ -13,9 +13,7 @@ static struct coro {
 	jmp_buf buf;
 } first, *here = &first, *prev, *idle;
 
-coro corunning(void) {
-	return(here);
-}
+coro cohere(void) { return(here); }
 
 void *coto(coro next, void *arg) {
 	static void *it; it = arg;
