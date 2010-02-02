@@ -16,9 +16,9 @@ static struct coro {
 
 coro cohere(void) { return(here); }
 
-va_list coto(coro next, ...) {
-	static va_list ap; va_start(ap, next);
-	coro prev = here; here = next;
+va_list coto(coro to, ...) {
+	coro prev = here, next = here = to;
+	static va_list ap; va_start(ap, to);
 	if(!setjmp(prev->buf)) longjmp(next->buf, 1);
 	return(ap);
 }
@@ -37,8 +37,8 @@ void coroutine1(void) {
 }
 
 void coroutine2(void *dummy) {
-	struct coro me, *prev = here; here = idle = &me;
-	va_list ap1 = coto(prev, dummy);
+	struct coro me, *prev = here;
+	va_list ap1 = coto(prev, dummy, here = idle = &me);
 	corofun fun = va_arg(ap1, corofun);
 	va_list ap2 = va_arg(ap1, va_list);
 	if(!setjmp(here->buf)) coroutine1();
