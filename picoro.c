@@ -43,7 +43,7 @@ void coroutine2(void *dummy) {
 	pfn = coto(there, dummy);
 	fun = *pfn; there = prev;
 	if(!setjmp(here->buf)) coroutine1();
-	exit(fun(coto(there, &me)));
+	exit(fun(coto(there, here)));
 }
 
 /* eof */
