@@ -14,7 +14,7 @@ static struct coro {
 	jmp_buf buf;
 } first, *here = &first, *idle;
 
-coro corunning(void) {
+coro cohere(void) {
 	return(here);
 }
 

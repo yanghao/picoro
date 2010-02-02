@@ -12,6 +12,6 @@ typedef int corofun(coro,va_list);
 
 va_list coroutine(corofun *fun, ...);
 va_list coto(coro, ...);
-coro corunning(void);
+coro cohere(void);
 
 #endif /* PICORO_H */
