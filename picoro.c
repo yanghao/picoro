@@ -5,6 +5,7 @@
  */
 
 #include <setjmp.h>
+#include <stdarg.h>
 #include <stdlib.h>
 
 #include "picoro.h"
@@ -17,18 +18,19 @@ coro corunning(void) {
 	return(here);
 }
 
-void *coto(coro next, void *arg) {
-	static void *it; it = arg;
+va_list coto(coro next, ...) {
+	static va_list ap; va_start(ap, next);
 	prev = here; here = next;
 	if(!setjmp(prev->buf)) longjmp(next->buf, 1);
-	return(it);
+	return(ap);
 }
 
 void coroutine1(void), coroutine2(void*);
 
-coro coroutine(int (*fun)(void*)) {
+va_list coroutine(int (*fun)(coro,va_list), ...) {
+	va_list ap; va_start(ap, fun);
 	if(!idle && !setjmp(here->buf)) coroutine1();
-	return(coto(idle, &fun));
+	return(coto(idle, fun, ap));
 }
 
 void coroutine1(void) {
@@ -37,13 +39,16 @@ void coroutine1(void) {
 }
 
 void coroutine2(void *dummy) {
-	int (*fun)(void*), (**pfn)(void*);
-	struct coro me, *there = here;
-	idle = here = &me;
-	pfn = coto(there, dummy);
-	fun = *pfn; there = prev;
+	struct coro me;
+	va_list ap1, ap2;
+	int (*fun)(coro,va_list);
+	prev = here; here = idle = &me;
+	ap1 = coto(prev, dummy);
+	fun = va_arg(ap1, int (*)(coro,va_list));
+	ap2 = va_arg(ap1, va_list);
+	      va_end(ap1);
 	if(!setjmp(here->buf)) coroutine1();
-	exit(fun(coto(there, here)));
+	exit(fun(here, ap2));
 }
 
 /* eof */

@@ -10,7 +10,7 @@
 typedef struct coro *coro;
 
 coro corunning(void);
-coro coroutine(int fun(void*));
-void *coto(coro, void*);
+va_list coroutine(int fun(coro,va_list), ...);
+va_list coto(coro, ...);
 
 #endif /* PICORO_H */
