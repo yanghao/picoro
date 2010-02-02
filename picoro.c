@@ -4,9 +4,7 @@
  * http://creativecommons.org/publicdomain/zero/1.0/
  */
 
-#include <assert.h>
 #include <setjmp.h>
-#include <stdbool.h>
 #include <stdlib.h>
 
 #include "picoro.h"
