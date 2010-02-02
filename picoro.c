@@ -34,15 +34,15 @@ coro coroutine(int fun(void *)) {
 }
 
 void coroutine_new(void) {
-	char space[16 * 1024];
-	coroutine_starter(space);
+	char dummy[16 * 1024];
+	coroutine_starter(dummy);
 }
 
-void coroutine_starter(void *space) {
+void coroutine_starter(void *dummy) {
 	int (*fun)(coro);
 	struct coro me, *back = here;
 	idle = here = &me;
-	fun = coto(back, space);
+	fun = coto(back, dummy);
 	back = prev;
 	if(!setjmp(here->buf)) coroutine_new();
 	exit(fun(coto(back, &me)));
