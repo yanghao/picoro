@@ -38,7 +38,7 @@ void coroutine1(void) {
 
 void coroutine2(void *dummy) {
 	struct coro me, *prev = here;
-	va_list ap1 = coto(prev, dummy, here = idle = &me);
+	va_list ap1 = coto(prev, here = idle = &me, dummy);
 	corofun fun = va_arg(ap1, corofun);
 	va_list ap2 = va_arg(ap1, va_list);
 	if(!setjmp(here->buf)) coroutine1();
