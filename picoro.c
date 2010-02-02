@@ -24,20 +24,20 @@ void *coto(coro next, void *arg) {
 	return(it);
 }
 
-void coroutine1(void), coroutine2(void *);
+void coroutine1(void), coroutine2(void*);
 
-coro coroutine(int (*fun)(void *)) {
+coro coroutine(int (*fun)(void*)) {
 	if(!idle && !setjmp(here->buf)) coroutine1();
 	return(coto(idle, &fun));
 }
 
 void coroutine1(void) {
-	char dummy[16 * 1024];
+	char dummy[16*1024];
 	coroutine2(dummy);
 }
 
 void coroutine2(void *dummy) {
-	int (*fun)(void *), (**pfn)(void *);
+	int (*fun)(void*), (**pfn)(void*);
 	struct coro me, *back = here;
 	idle = here = &me;
 	pfn = coto(back, dummy);
