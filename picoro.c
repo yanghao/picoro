@@ -37,11 +37,11 @@ void coroutine_new(void) {
 }
 
 void coroutine_starter(void *dummy) {
-	int (*fun)(void *), (**pfun)(void *);
+	int (*fun)(void *), (**pfn)(void *);
 	struct coro me, *back = here;
 	idle = here = &me;
-	pfun = coto(back, dummy);
-	back = prev; fun = *pfun;
+	pfn = coto(back, dummy);
+	fun = *pfn; back = prev;
 	if(!setjmp(here->buf)) coroutine_new();
 	exit(fun(coto(back, &me)));
 }
