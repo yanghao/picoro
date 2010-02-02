@@ -1,5 +1,5 @@
 /*
- * picoro - minimal coroutines for C.
+ * picoro: minimal coroutines in pure C
  * Written by Tony Finch <dot@dotat.at>
  * http://creativecommons.org/publicdomain/zero/1.0/
  */
