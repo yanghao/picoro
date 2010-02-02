@@ -38,12 +38,12 @@ void coroutine1(void) {
 
 void coroutine2(void *dummy) {
 	int (*fun)(void*), (**pfn)(void*);
-	struct coro me, *back = here;
+	struct coro me, *there = here;
 	idle = here = &me;
-	pfn = coto(back, dummy);
-	fun = *pfn; back = prev;
+	pfn = coto(there, dummy);
+	fun = *pfn; there = prev;
 	if(!setjmp(here->buf)) coroutine1();
-	exit(fun(coto(back, &me)));
+	exit(fun(coto(there, &me)));
 }
 
 /* eof */
