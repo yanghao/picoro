@@ -24,7 +24,7 @@ void *coto(coro next, void *arg) {
 	return(saved);
 }
 
-void coroutine_new(void), coroutine_starter(void*);
+void coroutine_new(void), coroutine_starter(void *);
 
 coro coroutine(int fun(void *)) {
 	if(!idle && !setjmp(here->buf)) coroutine_new();
@@ -37,7 +37,7 @@ void coroutine_new(void) {
 }
 
 void coroutine_starter(void *dummy) {
-	int (*fun)(coro);
+	int (*fun)(void *);
 	struct coro me, *back = here;
 	idle = here = &me;
 	fun = coto(back, dummy);
