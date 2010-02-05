@@ -42,7 +42,7 @@ bool resumable(coro c) {
 /*
  * Add a coroutine to a list and return the previous head of the list.
  */
-static inline void push(coro *list, coro c) {
+static void push(coro *list, coro c) {
 	c->next = *list;
 	*list = c;
 }
@@ -50,7 +50,7 @@ static inline void push(coro *list, coro c) {
 /*
  * Remove a coroutine from a list and return it.
  */
-static inline coro pop(coro *list) {
+static coro pop(coro *list) {
 	coro c = *list;
 	*list = c->next;
 	c->next = NULL;
@@ -62,7 +62,7 @@ static inline coro pop(coro *list) {
  * The current coroutine's state is saved in "me" and the
  * target coroutine is at the head of the "running" list.
  */
-static void *pass(coro me, void arg) {
+static void *pass(coro me, void *arg) {
 	static void *saved;
 	saved = arg;
 	if(!setjmp(me->state))
@@ -81,7 +81,7 @@ void *yield(void *arg) {
 }
 
 /* Declare for mutual recursion. */
-void coroutine_start(void);
+void coroutine_start(void), coroutine_main(void*);
 
 /*
  * The coroutine constructor function.
