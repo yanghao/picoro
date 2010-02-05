@@ -6,7 +6,6 @@
 
 #include <assert.h>
 #include <setjmp.h>
-#include <stdbool.h>
 #include <stdlib.h>
 
 #include "picoro.h"
@@ -35,7 +34,7 @@ static struct coro {
  * A coroutine can be passed to resume() if
  * it is not on the running or idle lists.
  */
-bool resumable(coro c) {
+int resumable(coro c) {
 	return(c != NULL && c->next == NULL);
 }
 
